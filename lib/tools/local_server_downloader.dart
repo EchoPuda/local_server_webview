@@ -228,9 +228,10 @@ class LocalServerDownloadService {
     // 判断是否需要递归下载
     void checkBasicDownloadNeedRecursion() {
       int dirtyCount = basicsBucket
-          .where((element) => (element.loadState != LoadStateType.success && element.downloadCount < downloadMaxCount))
+          .where((element) => (element.loadState == LoadStateType.unLoad && element.downloadCount < downloadMaxCount))
           .toList().length;
       if (dirtyCount <= 0) {
+        _log("结束Basic 下载，部分资源下载失败");
         return;
       }
       _fetchBasicsDataFromNetwork(key, curItem, basicsCache);
@@ -300,6 +301,9 @@ class LocalServerDownloadService {
       replaceItem(item);
       checkBasicDownloadAllDown();
     }).catchError((err) {
+      // 失败的移除，不在本次下载（可调整为尝试几次后再移除）
+      basicsBucket.removeWhere((element) => element.zipUrl == curItem.zipUrl);
+      _log("basic 资源下载失败 zipUrl: ${LocalServerConfiguration.downloadUrl(curItem.zipUrl)}");
       checkBasicDownloadNeedRecursion();
     });
   }
