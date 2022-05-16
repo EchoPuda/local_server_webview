@@ -83,6 +83,8 @@ class LocalServerServiceHandler {
 
   LocalServerStatusHandler? observe;
 
+  /// oriUrl 其实没用，目前设计是统一一个本地地址。
+  /// 但也可以考虑设计成不同链接对应不同的本地地址，启动多个服务。用[oriUrl] 来寻找
   String _getLocalServerWebUrl(String oriUrl, String localServerKey) {
     return 'http://${curAddresses ?? InternetAddress.loopbackIPv4.address}:$curPort$localServerKey';
   }
